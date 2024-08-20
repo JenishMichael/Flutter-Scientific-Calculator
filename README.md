@@ -1,16 +1,12 @@
-# sci_calculator
+Calculator App
 
-A new Flutter project.
+A simple yet powerful calculator app built using Flutter. This app is designed to handle basic arithmetic operations with plans to extend its functionality to a scientific calculator in the future.
 
-## Getting Started
+Features:
+Basic Arithmetic: Perform addition, subtraction, multiplication, and division.
+Scientific Operations (Planned): Includes trigonometric functions, logarithms, and operations following BODMAS rules.
+Interactive UI: A user-friendly interface with responsive buttons.
+Cross-Platform: Works seamlessly on both Android and iOS.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Jenish Michael
+GitHub: [JenishMichael](https://github.com/JenishMichael/Flutter-Scientific-Calculator)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expressions/expressions.dart';
+import 'package:function_tree/function_tree.dart';
 
 class CalUI extends StatefulWidget {
   const CalUI({super.key});
@@ -25,7 +26,7 @@ class _CalUIState extends State<CalUI> {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(0, 5, 20, 25),
-            height: 85,
+            height: 95,
             width: double.infinity,
             child: Align(
               alignment: Alignment.centerRight,
@@ -162,7 +163,11 @@ class _CalUIState extends State<CalUI> {
         heightValue = isScientific ? 60 : 70;
         fontSizeValue = isScientific ? 15 : 25;
       });
-    } else if (btnText == "AC") {
+    }
+    // else if (btnText == "π") {
+    //   evalResult("3.14159265359");
+    // }
+    else if (btnText == "AC") {
       setState(() {
         display = "";
       });
@@ -170,20 +175,33 @@ class _CalUIState extends State<CalUI> {
       setState(() {
         display = display.substring(0, display.length - 1);
       });
+    } else if (btnText == "x!") {
+      setState(() {
+        display += "!";
+      });
+    } else if (btnText == "1/x") {
+      setState(() {
+        display += "^(-1)";
+      });
+    } else if (btnText == "√x") {
+      setState(() {
+        display += "√";
+      });
     } else if (btnText == "=") {
-      print("Inside =");
-      if (display.contains("%") && display.contains("x")) {
-        print("Inside %,*");
-        String displayReaplacedBoth =
-            display.replaceAll("x", "*").replaceAll("%", "/100");
-        print(displayReaplacedBoth);
-        evalResult(displayReaplacedBoth);
-      } else if (display.contains("x")) {
-        print("Inside X");
-        String displayReaplaced = display.replaceAll("x", "*");
-        print("replace *");
-        print(displayReaplaced);
-        evalResult(displayReaplaced);
+      if (display.contains("π") ||
+          display.contains("x") ||
+          display.contains("%") ||
+          display.contains("e") ||
+          display.contains("x!") ||
+          display.contains("√x")) {
+        String displayReplaced = display
+            .replaceAll("π", "3.14159265359")
+            .replaceAll("%", "/100")
+            .replaceAll("x", "*")
+            .replaceAll("e", "2.71828182846")
+            .replaceAll("x!", "!");
+
+        evalResult(displayReplaced);
       } else {
         evalResult(display);
       }
@@ -194,12 +212,22 @@ class _CalUIState extends State<CalUI> {
     }
   }
 
+  // void evalResult(String passedStr) {
+  //   Expression expression = Expression.parse(passedStr);
+  //   ExpressionEvaluator evaluator = const ExpressionEvaluator();
+  //   var result = evaluator.eval(expression, {});
+  //   print(result);
+  //   print(result.runtimeType);
+  //   setState(() {
+  //     display = result.toString();
+  //   });
+  // }
+
   void evalResult(String passedStr) {
-    Expression expression = Expression.parse(passedStr);
-    ExpressionEvaluator evaluator = const ExpressionEvaluator();
-    var result = evaluator.eval(expression, {});
-    print(result);
+    print(passedStr);
+    var result = passedStr.interpret().toDouble();
     print(result.runtimeType);
+    print(result);
     setState(() {
       display = result.toString();
     });

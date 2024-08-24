@@ -1,6 +1,8 @@
+import 'dart:math';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:expressions/expressions.dart';
 import 'package:function_tree/function_tree.dart';
+import 'package:sci_calculator/Calculator/cal_color.dart';
 
 class CalUI extends StatefulWidget {
   const CalUI({super.key});
@@ -13,9 +15,18 @@ class _CalUIState extends State<CalUI> {
   //Creating the properties
   String display = "";
   bool isScientific = false;
-  //
+
+  // For Calculation
+  bool islg = false;
+  bool isRadianBtn = true;
+  bool checkIsDeg = true;
+
+  // To set Value
   double heightValue = 70;
   double fontSizeValue = 25;
+
+  //Creating obj of CalServices
+  CalColor calColor = CalColor();
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +41,18 @@ class _CalUIState extends State<CalUI> {
             width: double.infinity,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text(
-                display, //Y Error
+              child: AutoSizeText(
+                display,
                 style: const TextStyle(fontSize: 50, color: Colors.white),
+                maxLines: 1,
               ),
             ),
           ),
           if (isScientific)
             Row(
               children: [
-                addBtn("2nd"),
-                addBtn("rad"),
+                addBtn("e"),
+                if (isRadianBtn) addBtn("rad") else addBtn("deg"),
                 addBtn("sin"),
                 addBtn("cos"),
                 addBtn("tan"),
@@ -52,7 +64,7 @@ class _CalUIState extends State<CalUI> {
               children: [
                 addBtn("xʸ"),
                 addBtn("lg"),
-                addBtn("In"),
+                addBtn("ln"),
                 addBtn("("),
                 addBtn(")"),
               ],
@@ -94,22 +106,17 @@ class _CalUIState extends State<CalUI> {
             ],
           ),
           Row(
-            children: [
-              if (isScientific) addBtn("Sci"),
-              if (isScientific) addBtn("e") else addBtn("Sci"),
-              addBtn("0"),
-              addBtn("."),
-              addBtn("=")
-            ],
+            children: [addBtn("Sci"), addBtn("0"), addBtn("."), addBtn("=")],
           ),
         ],
       ),
     );
   }
 
+  //Method take btn Name as Input and return as Button
   Expanded addBtn(btnText) {
     return Expanded(
-      flex: 1,
+      flex: btnText == "Sci" && isScientific ? 2 : 1,
       child: Container(
         //Height of Row
         height: heightValue,
@@ -119,7 +126,8 @@ class _CalUIState extends State<CalUI> {
             child: Text(
               btnText,
               style: TextStyle(
-                  fontSize: fontSizeValue, color: getColortxt(btnText)),
+                  fontSize: fontSizeValue,
+                  color: calColor.getColortxt(btnText)),
             ),
             onPressed: () {
               btnOnPressed(btnText);
@@ -129,45 +137,43 @@ class _CalUIState extends State<CalUI> {
                   RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),
                 ),
-                backgroundColor: WidgetStatePropertyAll(getBtnBg(btnText)))),
+                backgroundColor:
+                    WidgetStatePropertyAll(calColor.getBtnBg(btnText)))),
       ),
     );
   }
 
-  Color getBtnBg(String txt) {
-    if (txt == "=") {
-      return Color.fromARGB(255, 255, 128, 0);
-    } else {
-      return Color.fromARGB(255, 51, 50, 50);
-    }
-  }
-
-  Color getColortxt(String txt) {
-    if (txt == "AC" ||
-        txt == "C" ||
-        txt == "%" ||
-        txt == "/" ||
-        txt == "+" ||
-        txt == "-" ||
-        txt == "x") {
-      return const Color.fromARGB(255, 255, 128, 0);
-    } else {
-      return Colors.white;
-    }
-  }
-
+  //This Method is called when a btn is clicked
   void btnOnPressed(String btnText) {
     if (btnText == "Sci") {
       setState(() {
         isScientific = !isScientific;
         heightValue = isScientific ? 60 : 70;
-        fontSizeValue = isScientific ? 15 : 25;
+        fontSizeValue = isScientific ? 13 : 25;
       });
-    }
-    // else if (btnText == "π") {
-    //   evalResult("3.14159265359");
-    // }
-    else if (btnText == "AC") {
+    } else if (btnText == "ln") {
+      islg = false;
+      setState(() {
+        display += "ln";
+      });
+    } else if (btnText == "lg") {
+      islg = true;
+      setState(() {
+        display += "lg";
+      });
+    } else if (btnText == "rad") {
+      isRadianBtn = false;
+      checkIsDeg = false;
+      setState(() {});
+    } else if (btnText == "deg") {
+      isRadianBtn = true;
+      checkIsDeg = true;
+      setState(() {});
+    } else if (btnText == "xʸ") {
+      setState(() {
+        display += "^";
+      });
+    } else if (btnText == "AC") {
       setState(() {
         display = "";
       });
@@ -193,13 +199,17 @@ class _CalUIState extends State<CalUI> {
           display.contains("%") ||
           display.contains("e") ||
           display.contains("x!") ||
-          display.contains("√x")) {
+          display.contains("√x") ||
+          display.contains("ln(") ||
+          display.contains("lg(")) {
         String displayReplaced = display
             .replaceAll("π", "3.14159265359")
             .replaceAll("%", "/100")
             .replaceAll("x", "*")
             .replaceAll("e", "2.71828182846")
-            .replaceAll("x!", "!");
+            .replaceAll("x!", "!")
+            .replaceAll("ln(", "log(")
+            .replaceAll("lg(", "log(");
 
         evalResult(displayReplaced);
       } else {
@@ -212,22 +222,40 @@ class _CalUIState extends State<CalUI> {
     }
   }
 
-  // void evalResult(String passedStr) {
-  //   Expression expression = Expression.parse(passedStr);
-  //   ExpressionEvaluator evaluator = const ExpressionEvaluator();
-  //   var result = evaluator.eval(expression, {});
-  //   print(result);
-  //   print(result.runtimeType);
-  //   setState(() {
-  //     display = result.toString();
-  //   });
-  // }
-
   void evalResult(String passedStr) {
-    print(passedStr);
-    var result = passedStr.interpret().toDouble();
+    var result;
+    if (display.contains("/0")) {
+      result = "Can't divide by zero";
+    } else if (passedStr.contains("log(") && islg) {
+      var result1 = passedStr.interpret().toDouble();
+      result = result1 / log(10);
+    } else if ((passedStr.startsWith("sin(") ||
+            passedStr.startsWith("cos(") ||
+            passedStr.startsWith("tan(")) &&
+        !checkIsDeg) {
+      int length = passedStr.length;
+
+      String angleStr = passedStr.substring(4, length - 1);
+
+      double angleD = double.parse(angleStr);
+      double radian = angleD * (3.14159265359 / 180);
+
+      if (passedStr.contains("sin")) {
+        double degree = sin(radian);
+        result = degree.toStringAsPrecision(2);
+      } else if (passedStr.contains("cos")) {
+        double degree = cos(radian);
+        result = degree.toStringAsPrecision(2);
+      } else {
+        double degree = tan(radian);
+        result = degree.toStringAsPrecision(2);
+      }
+    } else {
+      result = passedStr.interpret().toDouble();
+    }
     print(result.runtimeType);
     print(result);
+
     setState(() {
       display = result.toString();
     });
